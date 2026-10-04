@@ -25,8 +25,37 @@ continuous live use.
 
 ---
 
+## Why droneid-native
+
+Same captures, same machine (4-core laptop CPU), compared against the unmodified reference
+receiver:
+
+| | Reference receiver (Python) | droneid-native |
+|---|---|---|
+| Detection, 1.3 s capture at 50 Msps | 5.3 s, finds **0** of 3 bursts | 0.48 s, finds **3** of 3 (**11× faster**) |
+| Decode one burst at 50 Msps | 1376 ms | 52 ms (**26× faster**) |
+| Decode one burst at 100 Msps | 1763 ms, CRC fails | 68 ms, CRC valid |
+| 100 Msps capture vs air time | 7.7× slower than real time | Faster than real time (0.53 s for 0.65 s) |
+| Detection memory per 500 ms at 50 Msps | ≈400 MB STFT matrix | ≈3 MB (**≈128× less**) |
+| Runtime | Python, NumPy, SciPy, Matplotlib | Self-contained DLLs; callable from LabVIEW, C, Python |
+
+**Why it is faster:** compiled C in place of per-sample Python loops; a coarse-to-fine timing
+search (about 100 evaluations instead of 1000); an OpenMP-parallel STFT detector that keeps
+one value per frame instead of a full matrix; and cheap early rejection of false candidates
+(ZC root check, then hard decision and CRC, with turbo decoding only as a fallback).
+
+**Why it decodes more:** a median noise floor that works on long, sparse, real-world captures;
+an anti-aliased Lanczos-3 resampler instead of linear interpolation; an integer-subcarrier CFO
+search; and a real LTE turbo decoder where the reference reads only the systematic bits.
+
+The full methodology, per-stage numbers, and the cases where the reference still does better
+are in [How droneid-native compares](docs/comparison.md).
+
+---
+
 ## Contents
 
+- [Why droneid-native](#why-droneid-native)
 - [Quick start](#quick-start)
 - [Libraries](#libraries)
 - [Input format](#input-format)
@@ -250,6 +279,7 @@ breakdown for `locate_droneid_file`.
 | [LabVIEW integration](docs/labview-integration.md) | `droneid_process` CLFN configuration, VI structure, troubleshooting |
 | [Building and deployment](docs/building.md) | Build options, tests, installation, runtime dependencies |
 | [Architecture](docs/architecture.md) | Signal-processing pipeline, source layout, tuning knobs |
+| [Comparison](docs/comparison.md) | Measured speed, memory and decode-rate comparison with the reference receiver |
 | [Changelog](CHANGELOG.md) | Release history |
 
 ---
