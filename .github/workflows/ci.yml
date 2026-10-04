@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows (MSVC)
+            os: windows-latest
+            configure: cmake -B build -G "Visual Studio 17 2022" -A x64
+          - name: Linux (GCC)
+            os: ubuntu-latest
+            configure: cmake -B build -DCMAKE_BUILD_TYPE=Release
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: ${{ matrix.configure }}
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure

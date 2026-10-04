@@ -1,0 +1,25 @@
+# Build trees
+/build*/
+/out/
+CMakeUserPresets.json
+
+# Compiler and IDE output
+*.obj
+*.o
+*.ilk
+*.pdb
+*.exp
+*.lib
+*.exe
+*.so
+.vs/
+.vscode/
+.idea/
+__pycache__/
+
+# Local IQ captures are never committed
+*.bin
+*.cf32
+*.cfile
+*.sigmf-data
+*.raw
