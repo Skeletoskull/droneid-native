@@ -12,7 +12,8 @@ Usage:
               0x1 legacy frame format, 0x2 assume standard ZC roots,
               0x4 conjugate input (undo a spectrally inverted recording)
     --dll-dir folder holding droneid_bridge.dll, droneid_detect.dll,
-              droneid_locate.dll and vcomp140.dll (default: ../bin/windows-x64)
+              droneid_locate.dll and vcomp140.dll (default: ../bin/windows-x64
+              in the repository, ../bin in the release archive)
 
 Requires numpy.
 """
@@ -24,7 +25,11 @@ import sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_DLL_DIR = os.path.join(HERE, os.pardir, "bin", "windows-x64")
+DEFAULT_DLL_DIR = next(
+    (d for d in (os.path.join(HERE, os.pardir, "bin", "windows-x64"),
+                 os.path.join(HERE, os.pardir, "bin"))
+     if os.path.isfile(os.path.join(d, "droneid_bridge.dll"))),
+    os.path.join(HERE, os.pardir, "bin", "windows-x64"))
 STATUS = {0: "decoded", 1: "no frame", -1: "invalid argument",
           -2: "detection error", -3: "allocation failure"}
 
